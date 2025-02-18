@@ -5,24 +5,31 @@ const renderizador = new THREE.WebGLRenderer();
 renderizador.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderizador.domElement);
 
-// Crear un cubo
-const geometría = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-const cubo = new THREE.Mesh(geometría, material);
-escena.add(cubo);
+// Crear un cilindro
+const geometría = new THREE.CylinderGeometry(1, 1, 4, 32); // Radio superior, radio inferior, altura, segmentos
+
+// Cargar la textura
+const loader = new THREE.TextureLoader();
+loader.load('/textura.jpg', function (textura) {//agarra una imagen en jpg para tomarlo como textura
+    const material = new THREE.MeshStandardMaterial({ map: textura });
+
+    // Crear el cilindro y añadirlo a la escena
+    const cilindro = new THREE.Mesh(geometría, material);
+    escena.add(cilindro);
+
+    // Animación del cilindro
+    function animacion() {
+        requestAnimationFrame(animacion);
+        cilindro.rotation.x += 0.01;
+        cilindro.rotation.y += 0.01;
+        renderizador.render(escena, camara);
+    }
+
+    animacion();
+});
 
 // Posicionar la cámara
 camara.position.z = 5;
-
-// Animación del cubo
-function animacion() {
-    requestAnimationFrame(animacion);
-    cubo.rotation.x += 0.01;
-    cubo.rotation.y += 0.01;
-    renderizador.render(escena, camara);
-}
-
-animacion();
 
 // Ajustar el tamaño de la ventana al cambiar su tamaño
 window.addEventListener('resize', () => {
@@ -30,3 +37,8 @@ window.addEventListener('resize', () => {
     camara.updateProjectionMatrix();
     renderizador.setSize(window.innerWidth, window.innerHeight);
 });
+
+// Añadir una luz para que la textura se vea correctamente
+const luz = new THREE.DirectionalLight(0xffffff, 1);
+luz.position.set(5, 5, 5).normalize();
+escena.add(luz);
